@@ -565,6 +565,208 @@ jboolean sendMessage(JNIEnv* env, jobject thiz, jstring jto, jstring jmsg)
 }
 
 static
+jboolean sendFile(JNIEnv* env, jobject thiz, jstring jto, jstring jfilename)
+{
+    const char *to;
+    const char *filename;
+    int rc;
+
+    assert(jto);
+    assert(jfilename);
+
+    to = (*env)->GetStringUTFChars(env, jto, NULL);
+    if (!to) {
+        setErrorCode(IOEX_GENERAL_ERROR(IOEXERR_OUT_OF_MEMORY));
+        return JNI_FALSE;
+    }
+
+    filename = (*env)->GetStringUTFChars(env, jfilename, NULL);
+    if (!filename) {
+        (*env)->ReleaseStringUTFChars(env, jto, to);
+        setErrorCode(IOEX_GENERAL_ERROR(IOEXERR_OUT_OF_MEMORY));
+        return JNI_FALSE;
+    }
+
+    rc = IOEX_send_file_request(getCarrier(env, thiz), to, filename);
+    (*env)->ReleaseStringUTFChars(env, jto, to);
+    (*env)->ReleaseStringUTFChars(env, jfilename, filename);
+
+    if (rc < 0) {
+        logE("Call IOEX_send_file_request API error");
+        setErrorCode(IOEX_get_error());
+        return JNI_FALSE;
+    }
+    return JNI_TRUE;
+}
+
+static
+jboolean acceptFile(JNIEnv* env, jobject thiz, jstring jsenderid, jstring jfileindex, jstring jfilename, jstring jfilepath)
+{
+    const char *senderid;
+    const char *filename;
+    const char *fileindex;
+    const char *filepath;
+    int rc;
+
+    assert(jsenderid);
+    assert(jfilename);
+    assert(jfileindex);
+    assert(jfilepath);
+
+    senderid = (*env)->GetStringUTFChars(env, jsenderid, NULL);
+    if (!jsenderid) {
+        setErrorCode(IOEX_GENERAL_ERROR(IOEXERR_OUT_OF_MEMORY));
+        return JNI_FALSE;
+    }
+    logE("senderid: %s" , senderid);
+
+    filename = (*env)->GetStringUTFChars(env, jfilename, NULL);
+    if (!filename) {
+        (*env)->ReleaseStringUTFChars(env, jsenderid, senderid);
+        setErrorCode(IOEX_GENERAL_ERROR(IOEXERR_OUT_OF_MEMORY));
+        return JNI_FALSE;
+    }
+    logE("filename: %s" , filename);
+
+    fileindex = (*env)->GetStringUTFChars(env, jfileindex, NULL);
+    if (!fileindex) {
+        (*env)->ReleaseStringUTFChars(env, jsenderid, senderid);
+        (*env)->ReleaseStringUTFChars(env, jfilename, filename);
+        setErrorCode(IOEX_GENERAL_ERROR(IOEXERR_OUT_OF_MEMORY));
+        return JNI_FALSE;
+    }
+    logE("filename: %s" , filename);
+
+    filepath = (*env)->GetStringUTFChars(env, jfilepath, NULL);
+    if (!filepath) {
+        (*env)->ReleaseStringUTFChars(env, jsenderid, senderid);
+        (*env)->ReleaseStringUTFChars(env, jfilename, filename);
+        (*env)->ReleaseStringUTFChars(env, jfileindex, fileindex);
+        setErrorCode(IOEX_GENERAL_ERROR(IOEXERR_OUT_OF_MEMORY));
+        return JNI_FALSE;
+    }
+    logE("FileIndex: %s" , fileindex);
+
+    rc = IOEX_send_file_accept(getCarrier(env, thiz), senderid, fileindex, filename, filepath);
+    (*env)->ReleaseStringUTFChars(env, jsenderid, senderid);
+    (*env)->ReleaseStringUTFChars(env, jfilename, filename);
+    (*env)->ReleaseStringUTFChars(env, jfileindex, fileindex);
+    (*env)->ReleaseStringUTFChars(env, jfilepath, filepath);
+
+    if (rc < 0) {
+        logE("Call IOEX_send_file_accept API error");
+        setErrorCode(IOEX_get_error());
+        return JNI_FALSE;
+    }
+    return JNI_TRUE;
+}
+
+static
+jboolean pauseFile(JNIEnv* env, jobject thiz, jstring jfriendid, jstring jfileindex)
+{
+    const char *friendid;
+    const char *fileindex;
+    int rc;
+
+    assert(jfriendid);
+    assert(jfileindex != NULL);
+
+    friendid = (*env)->GetStringUTFChars(env, jfriendid, NULL);
+    if (!friendid) {
+        setErrorCode(IOEX_GENERAL_ERROR(IOEXERR_OUT_OF_MEMORY));
+        return JNI_FALSE;
+    }
+
+    fileindex = (*env)->GetStringUTFChars(env, jfileindex, NULL);
+    if (!fileindex) {
+        (*env)->ReleaseStringUTFChars(env, jfriendid, friendid);
+        setErrorCode(IOEX_GENERAL_ERROR(IOEXERR_OUT_OF_MEMORY));
+        return JNI_FALSE;
+    }
+
+    rc = IOEX_send_file_pause(getCarrier(env, thiz), friendid, fileindex);
+    (*env)->ReleaseStringUTFChars(env, jfriendid, friendid);
+    (*env)->ReleaseStringUTFChars(env, jfileindex, fileindex);
+
+    if (rc < 0) {
+        logE("Call IOEX_send_file_pause API error");
+        setErrorCode(IOEX_get_error());
+        return JNI_FALSE;
+    }
+    return JNI_TRUE;
+}
+
+static
+jboolean resumeFile(JNIEnv* env, jobject thiz, jstring jfriendid, jstring jfileindex)
+{
+    const char *friendid;
+    const char *fileindex;
+    int rc;
+
+    assert(jfriendid);
+    assert(jfileindex != NULL);
+
+    friendid = (*env)->GetStringUTFChars(env, jfriendid, NULL);
+    if (!friendid) {
+        setErrorCode(IOEX_GENERAL_ERROR(IOEXERR_OUT_OF_MEMORY));
+        return JNI_FALSE;
+    }
+
+    fileindex = (*env)->GetStringUTFChars(env, jfileindex, NULL);
+    if (!fileindex) {
+        (*env)->ReleaseStringUTFChars(env, jfriendid, friendid);
+        setErrorCode(IOEX_GENERAL_ERROR(IOEXERR_OUT_OF_MEMORY));
+        return JNI_FALSE;
+    }
+
+    rc = IOEX_send_file_resume(getCarrier(env, thiz), friendid, fileindex);
+    (*env)->ReleaseStringUTFChars(env, jfriendid, friendid);
+    (*env)->ReleaseStringUTFChars(env, jfileindex, fileindex);
+
+    if (rc < 0) {
+        logE("Call IOEX_send_file_resume API error");
+        setErrorCode(IOEX_get_error());
+        return JNI_FALSE;
+    }
+    return JNI_TRUE;
+}
+
+static
+jboolean cancelFile(JNIEnv* env, jobject thiz, jstring jfriendid, jstring jfileindex)
+{
+    const char *friendid;
+    const char *fileindex;
+    int rc;
+
+    assert(jfriendid);
+    assert(jfileindex != NULL);
+
+    friendid = (*env)->GetStringUTFChars(env, jfriendid, NULL);
+    if (!friendid) {
+        setErrorCode(IOEX_GENERAL_ERROR(IOEXERR_OUT_OF_MEMORY));
+        return JNI_FALSE;
+    }
+
+    fileindex = (*env)->GetStringUTFChars(env, jfileindex, NULL);
+    if (!fileindex) {
+        (*env)->ReleaseStringUTFChars(env, jfriendid, friendid);
+        setErrorCode(IOEX_GENERAL_ERROR(IOEXERR_OUT_OF_MEMORY));
+        return JNI_FALSE;
+    }
+
+    rc = IOEX_send_file_cancel(getCarrier(env, thiz), friendid, fileindex);
+    (*env)->ReleaseStringUTFChars(env, jfriendid, friendid);
+    (*env)->ReleaseStringUTFChars(env, jfileindex, fileindex);
+
+    if (rc < 0) {
+        logE("Call IOEX_send_file_cancel API error");
+        setErrorCode(IOEX_get_error());
+        return JNI_FALSE;
+    }
+    return JNI_TRUE;
+}
+
+static
 void friendInviteRspCallback(IOEXCarrier* carrier, const char* from, int status,
                               const char* reason, const void* data, size_t length, void* context)
 {
@@ -742,6 +944,12 @@ static JNINativeMethod gMethods[] = {
         {"accept_friend",      "("_J("String;)Z"),                 (void *) acceptFriend       },
         {"remove_friend",      "("_J("String;)Z"),                 (void *) removeFriend       },
         {"send_message",       "("_J("String;")_J("String;)Z"),    (void *) sendMessage        },
+        {"send_file",          "("_J("String;")_J("String;)Z"),    (void *) sendFile           },
+        {"accept_file",        "("_J("String;")_J("String;")_J("String;")_J("String;)Z"),\
+                                                                   (void *) acceptFile         },
+        {"pause_file",         "("_J("String;")_J("String;)Z"),    (void *) pauseFile          },
+        {"resume_file",        "("_J("String;")_J("String;)Z"),    (void *) resumeFile         },
+        {"cancel_file",        "("_J("String;")_J("String;)Z"),    (void *) cancelFile         },
         {"friend_invite",      "("_J("String;")_J("String;")_W("FriendInviteResponseHandler;)Z"), \
                                                                    (void*)inviteFriend         },
         {"reply_friend_invite","("_J("String;I")_J("String;")_J("String;)Z"),\

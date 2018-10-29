@@ -117,6 +117,30 @@ public class Carrier {
 		void onFriendInviteRequest(Carrier carrier, String from, String data) {
 			carrier.handler.onFriendInviteRequest(carrier, from, data);
 		}
+
+		void onFriendFileRequest(Carrier carrier, String from, String filename, long fileindex, long filesize) {
+			carrier.handler.onFriendFileRequest(carrier, from, filename, fileindex, filesize);
+		}
+
+        void onFriendFileAccepted(Carrier carrier, String receiver, long fileindex) {
+            carrier.handler.onFriendFileAccepted(carrier, receiver, fileindex);
+        }
+
+		void onFriendFileChunkReceived(Carrier carrier, String from, String filepath, long fileindex, long fileposition) {
+			carrier.handler.onFriendFileChunkReceived(carrier, from, filepath, fileindex, fileposition);
+		}
+
+		void onFriendFileChunkSent(Carrier carrier, String from, String filepath, long fileindex, long fileposition) {
+			carrier.handler.onFriendFileChunkSent(carrier, from, filepath, fileindex, fileposition);
+		}
+
+		void onFriendFilePaused(Carrier carrier, String from, long fileindex) {
+			carrier.handler.onFriendFilePaused(carrier, from, fileindex);
+		}
+
+		void onFriendFileResumed(Carrier carrier, String from, long fileindex) {
+			carrier.handler.onFriendFileResumed(carrier, from, fileindex);
+		}
 	}
 
 	/**
@@ -263,6 +287,11 @@ public class Carrier {
 	private native boolean reply_friend_invite(String from, int status, String reason,
 											   String data);
 	private static native int get_error_code();
+	private native boolean send_file(String to, String filename);
+	private native boolean pause_file(String friendid, String fileindex);
+	private native boolean resume_file(String friendid, String fileindex);
+	private native boolean cancel_file(String friendid, String fileindex);
+	private native boolean accept_file(String to, String fileindex, String filename, String filepath);
 
 	private Carrier(CarrierHandler handler) {
 		this.handler = handler;
@@ -875,5 +904,127 @@ public class Carrier {
 		else
 			Log.d(TAG, String.format("Refused friend invite to %s with status %d and " +
 					"reason %s", to, status, reason));
+	}
+
+	/**
+	 * Send a file to a friend.
+	 *
+	 * @param
+	 * 		to 			The target id
+	 * @param
+	 * 		filename		The message content defined by application
+	 *
+	 * @throws
+	 * 		IllegalArgumentException
+	 * 		IOEXException
+	 */
+	public void sendFriendFile(String to, String filename) throws IOEXException {
+		if (to == null || to.length() == 0 ||
+				filename == null || filename.length() == 0)
+			throw new IllegalArgumentException();
+
+		if (!send_file(to, filename))
+			throw new IOEXException(get_error_code());
+
+		Log.d(TAG, "Send file [" + filename + "] to friend " + to);
+	}
+
+	/**
+	 * Accept a file from a friend.
+	 *
+	 *
+	 * @param
+	 * 		senderid 		The sender id
+	 * @param
+	 * 		fileindex		The accepted file index
+	 * @param
+	 * 		filename		New file name
+	 * @param
+	 * 		filepath		The saved path for the accepted file
+	 *
+	 * @throws
+	 * 		IllegalArgumentException
+	 * 		IOEXException
+	 */
+	public void acceptFriendFile(String senderid, String fileindex, String filename, String filepath) throws IOEXException {
+		if (senderid == null || senderid.length() == 0 ||
+			fileindex == null || fileindex.length() == 0 ||
+			filename == null || filename.length() == 0 ||
+			filepath == null || filepath.length() == 0)
+			throw new IllegalArgumentException();
+
+		if (!accept_file(senderid, fileindex, filename, filepath))
+			throw new IOEXException(get_error_code());
+
+		Log.d(TAG, "Accept file [fileindex: " + fileindex + ", new filename: " + filename  + "] from friend " + senderid + "@filepath: " + filepath);
+	}
+
+	/**
+	 * Pause the process of sending/receiving a file to/from a friend.
+	 *
+	 * @param
+	 * 		id 			The target id
+	 * @param
+	 * 		fileindex		The fileindex
+	 *
+	 * @throws
+	 * 		IllegalArgumentException
+	 * 		IOEXException
+	 */
+	public void pauseFriendFile(String id, String fileindex) throws IOEXException {
+		if (id == null || id.length() == 0 ||
+				fileindex == null || fileindex.length() == 0)
+			throw new IllegalArgumentException();
+
+		if (!pause_file(id, fileindex))
+			throw new IOEXException(get_error_code());
+
+		Log.d(TAG, "Pause file [" + fileindex + "] to friend " + id);
+	}
+
+	/**
+	 * Resume the process of sending/receiving a file to/from a friend.
+	 *
+	 * @param
+	 * 		id 			The target id
+	 * @param
+	 * 		fileindex		The fileindex
+	 *
+	 * @throws
+	 * 		IllegalArgumentException
+	 * 		IOEXException
+	 */
+	public void resumeFriendFile(String id, String fileindex) throws IOEXException {
+		if (id == null || id.length() == 0 ||
+				fileindex == null || fileindex.length() == 0)
+			throw new IllegalArgumentException();
+
+		if (!resume_file(id, fileindex))
+			throw new IOEXException(get_error_code());
+
+		Log.d(TAG, "Resume file [" + fileindex + "] to friend " + id);
+	}
+
+	/**
+	 * Cancel the process of sending/receiving a file to/from a friend.
+	 *
+	 * @param
+	 * 		id 			The target id
+	 * @param
+	 * 		fileindex		The fileindex
+	 *
+	 * @throws
+	 * 		IllegalArgumentException
+	 * 		IOEXException
+	 */
+	public void cancelFriendFile(String id, String fileindex) throws IOEXException {
+		if (id == null || id.length() == 0 ||
+				fileindex == null || fileindex.length() == 0)
+			throw new IllegalArgumentException();
+
+		if (!cancel_file(id, fileindex))
+			throw new IOEXException(get_error_code());
+
+		Log.d(TAG, "Cancel file [" + fileindex + "] to friend " + id);
 	}
 }

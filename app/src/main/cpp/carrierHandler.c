@@ -443,6 +443,223 @@ void cbOnFriendInviteRquest(IOEXCarrier* carrier, const char* from, const void* 
     (*hc->env)->DeleteLocalRef(hc->env, jhello);
 }
 
+static
+void cbOnFileRequest(IOEXCarrier* carrier, const char* from, const uint32_t fileindex,
+                     const char *filename, uint64_t filesize, void *context)
+{
+    HandlerContext* hc = (HandlerContext*)context;
+    jstring jfrom;
+    jstring jfilename;
+    jlong jfileindex, jfilesize;
+
+    (void)filesize;
+    (void)fileindex;
+
+    assert(carrier);
+    assert(from);
+    assert(filename);
+
+    assert(carrier == hc->nativeCarrier);
+    assert(hc->env);
+
+    jfrom = (*hc->env)->NewStringUTF(hc->env, from);
+    if (!jfrom) {
+        logE("New java String object error");
+        return;
+    }
+    jfilename = (*hc->env)->NewStringUTF(hc->env, filename);
+    if (!jfilename) {
+        logE("New java String object error");
+        (*hc->env)->DeleteLocalRef(hc->env, jfrom);
+        return;
+    }
+
+    jfileindex = (jlong)fileindex;
+    jfilesize = (jlong)filesize;
+    if (!callVoidMethod(hc->env, hc->clazz, hc->callbacks,
+                        "onFriendFileRequest",
+                        "("_W("Carrier;")_J("String;")_J("String;")"JJ)V",
+                        hc->carrier, jfrom, jfilename, jfileindex, jfilesize)) {
+        logE("Call Carrier.Callbacks.onFriendFileRequest error");
+    }
+    (*hc->env)->DeleteLocalRef(hc->env, jfrom);
+    (*hc->env)->DeleteLocalRef(hc->env, jfilename);
+}
+
+static
+void cbOnFileAccepted(IOEXCarrier *carrier, const char *friendid, const uint32_t fileindex, void *context)
+{
+    HandlerContext* hc = (HandlerContext*)context;
+
+    jstring jreceiver;
+    jlong jfileindex;
+    (void) fileindex;
+
+    jreceiver = (*hc->env)->NewStringUTF(hc->env ,friendid);
+    if(!jreceiver){
+        logE("New java String(jreceiver) object error");
+        return;
+    }
+
+    jfileindex = (jlong) fileindex;
+    if (!callVoidMethod(hc->env, hc->clazz, hc->callbacks,
+                        "onFriendFileAccepted",
+                        "("_W("Carrier;")_J("String;")"J)V",
+                        hc->carrier, jreceiver, jfileindex)) {
+        logE("Call Carrier.Callbacks.onFriendFileAccepted error");
+    }
+    (*hc->env)->DeleteLocalRef(hc->env, jreceiver);
+}
+
+static
+void cbOnFilePaused(IOEXCarrier *carrier, const char *friendid, const uint32_t fileindex, void *context)
+{
+    HandlerContext* hc = (HandlerContext*)context;
+
+    jstring jfriendid;
+    jlong jfileindex;
+    (void) fileindex;
+
+    jfriendid = (*hc->env)->NewStringUTF(hc->env ,friendid);
+    if(!jfriendid){
+        logE("New java String(jfriendid) object error");
+        return;
+    }
+
+    jfileindex = (jlong) fileindex;
+    if (!callVoidMethod(hc->env, hc->clazz, hc->callbacks,
+                        "onFriendFilePaused",
+                        "("_W("Carrier;")_J("String;")"J)V",
+                        hc->carrier, jfriendid, jfileindex)) {
+        logE("Call Carrier.Callbacks.onFriendFilePaused error");
+    }
+    (*hc->env)->DeleteLocalRef(hc->env, jfriendid);
+}
+
+static
+void cbOnFileResumed(IOEXCarrier *carrier, const char *friendid, const uint32_t fileindex, void *context)
+{
+    HandlerContext* hc = (HandlerContext*)context;
+
+    jstring jfriendid;
+    jlong jfileindex;
+    (void) fileindex;
+
+    jfriendid = (*hc->env)->NewStringUTF(hc->env ,friendid);
+    if(!jfriendid){
+        logE("New java String(jfriendid) object error");
+        return;
+    }
+
+    jfileindex = (jlong) fileindex;
+    if (!callVoidMethod(hc->env, hc->clazz, hc->callbacks,
+                        "onFriendFileResumed",
+                        "("_W("Carrier;")_J("String;")"J)V",
+                        hc->carrier, jfriendid, jfileindex)) {
+        logE("Call Carrier.Callbacks.onFriendFileResumed error");
+    }
+    (*hc->env)->DeleteLocalRef(hc->env, jfriendid);
+}
+
+static
+void cbOnFileChunkRequest(IOEXCarrier *carrier, const char *friendid, const uint32_t fileindex,
+                          const char *fullpath, const uint64_t position, const size_t length,
+                          void *context)
+{
+    logD("[JNI] cbOnFileChunkRequest");
+    logD("[JNI] cbOnFileChunkRequest - position: %lu"  , position);
+    logD("[JNI] cbOnFileChunkRequest - length: %ld"  , length);
+    HandlerContext* hc = (HandlerContext*)context;
+
+}
+
+static
+void cbOnFileChunkReceive(IOEXCarrier *carrier, const char *friendid, const uint32_t fileindex,
+                          const char *fullpath, const uint64_t position, const size_t length,
+                          void *context)
+{
+    HandlerContext* hc = (HandlerContext*)context;
+    jstring jfrom, jfilepath;
+    jlong jfileindex, jposition, jfileblocklength;
+
+    (void)fileindex;
+    (void)position;
+    (void)length;
+
+    assert(friendid);
+    assert(fullpath);
+    assert(hc->env);
+
+    jfrom = (*hc->env)->NewStringUTF(hc->env, friendid);
+    if(!jfrom){
+        logE("New java String(jfrom) object error");
+        return;
+    }
+
+    jfilepath = (*hc->env)->NewStringUTF(hc->env, fullpath);
+    if(!jfilepath){
+        logE("New java String(jfilepath) object error");
+        (*hc->env)->DeleteLocalRef(hc->env, jfrom);
+        return;
+    }
+
+    jfileindex = (jlong) fileindex;
+    jposition = (jlong) position;
+    //jfileblocklength = (jlong) length;
+
+    if (!callVoidMethod(hc->env, hc->clazz, hc->callbacks,
+                        "onFriendFileChunkReceived",
+                        "("_W("Carrier;")_J("String;")_J("String;")"JJ)V",
+                        hc->carrier, jfrom, jfilepath, jfileindex, jposition)) {
+        logE("Call Carrier.Callbacks.onFriendFileChunkReceived error");
+    }
+    (*hc->env)->DeleteLocalRef(hc->env, jfrom);
+    (*hc->env)->DeleteLocalRef(hc->env, jfilepath);
+}
+
+static
+void cbOnFileChunkSent(IOEXCarrier *carrier, const char *friendid, const uint32_t fileindex,
+                          const char *fullpath, const uint64_t position, const size_t length,
+                          void *context)
+{
+    HandlerContext* hc = (HandlerContext*)context;
+    jstring jto, jfilepath;
+    jlong jfileindex, jposition;
+
+    (void)fileindex;
+    (void)position;
+    (void)length;
+
+    assert(friendid);
+    assert(fullpath);
+    assert(hc->env);
+
+    jto = (*hc->env)->NewStringUTF(hc->env, friendid);
+    if(!jto){
+        logE("New java String(jto) object error");
+        return;
+    }
+
+    jfilepath = (*hc->env)->NewStringUTF(hc->env, fullpath);
+    if(!jfilepath){
+        logE("New java String(jfilepath) object error");
+        (*hc->env)->DeleteLocalRef(hc->env, jto);
+        return;
+    }
+
+    jfileindex = (jlong) fileindex;
+    jposition = (jlong) position;
+
+    if (!callVoidMethod(hc->env, hc->clazz, hc->callbacks,
+                        "onFriendFileChunkSent",
+                        "("_W("Carrier;")_J("String;")_J("String;")"JJ)V",
+                        hc->carrier, jto, jfilepath, jfileindex, jposition)) {
+        logE("Call Carrier.Callbacks.onFriendFileChunkSent error");
+    }
+    (*hc->env)->DeleteLocalRef(hc->env, jto);
+    (*hc->env)->DeleteLocalRef(hc->env, jfilepath);
+}
+
 IOEXCallbacks  carrierCallbacks = {
         .idle            = cbOnIdle,
         .connection_status = cbOnConnection,
@@ -457,6 +674,12 @@ IOEXCallbacks  carrierCallbacks = {
         .friend_removed  = cbOnFriendRemoved,
         .friend_message  = cbOnFriendMessage,
         .friend_invite   = cbOnFriendInviteRquest,
+        .file_request    = cbOnFileRequest,
+        .file_accepted   = cbOnFileAccepted,
+        .file_paused     = cbOnFilePaused,
+        .file_resumed    = cbOnFileResumed,
+        .file_chunk_receive = cbOnFileChunkReceive,
+        .file_chunk_send = cbOnFileChunkSent,
 };
 
 int handlerCtxtSet(HandlerContext* hc, JNIEnv* env, jobject jcarrier, jobject jcallbacks)

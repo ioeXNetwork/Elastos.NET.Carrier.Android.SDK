@@ -170,4 +170,84 @@ public interface CarrierHandler {
 	 * 		data       	The application defined data sent from friend
 	 */
 	void onFriendInviteRequest(Carrier carrier, String from, String data);
+
+	/**
+	 * The callback function to process the friend file request.
+	 *
+	 * @param
+	 * 		carrier   	Carrier node instance
+	 * @param
+	 * 		from       	The user id from who send the file request
+	 * @param
+	 * 		filename       	The file name sent from friend
+	 */
+	void onFriendFileRequest(Carrier carrier, String from, String filename, long fileindex, long filesize);
+
+    /**
+         * The callback function to process the friend file accepted.
+         *
+         * @param
+         * 		carrier   	Carrier node instance
+         * @param
+         * 		receiver       	The user id who accepts the file sending request
+         * @param
+         * 		fileindex       	The file index accepts by receiver
+         */
+    void onFriendFileAccepted(Carrier carrier, String receiver, long fileindex);
+
+	/**
+	 * The callback function to process the friend file chunk received.
+	 *
+	 * @param
+	 * 		carrier   	Carrier node instance
+	 * @param
+	 * 		from       	The user id from who send the file request
+	 * @param
+	 * 		filepath       	The received full file path
+	 * @param
+	 * 		fileindex       	The file index
+	 * @param
+	 * 		fileposition       	The file block size will be transferred
+	 */
+	void onFriendFileChunkReceived(Carrier carrier, String from, String filepath, long fileindex, long fileposition);
+
+	/**
+	 * The callback function to process the friend file chunk sent.
+	 *
+	 * @param
+	 * 		carrier   	Carrier node instance
+	 * @param
+	 * 		to       	The user id from who accepted the file request
+	 * @param
+	 * 		filepath       	The received full file path
+	 * @param
+	 * 		fileindex       	The file index
+	 * @param
+	 * 		fileposition       	The file block size will be transferred
+	 */
+	void onFriendFileChunkSent(Carrier carrier, String to, String filepath, long fileindex, long fileposition);
+
+	/**
+	 * The callback function to process the friend file is paused.
+	 *
+	 * @param
+	 * 		carrier   	Carrier node instance
+	 * @param
+	 * 		id       	The user id from who paused the file request
+	 * @param
+	 * 		fileindex       	The file index
+	 */
+	void onFriendFilePaused(Carrier carrier, String id, long fileindex);
+
+	/**
+	 * The callback function to notify the file is resumed.
+	 *
+	 * @param
+	 * 		carrier   	Carrier node instance
+	 * @param
+	 * 		id       	The user id from who resumed the file transferring
+	 * @param
+	 * 		fileindex       	The file index
+	 */
+	void onFriendFileResumed(Carrier carrier, String id, long fileindex);
 }
