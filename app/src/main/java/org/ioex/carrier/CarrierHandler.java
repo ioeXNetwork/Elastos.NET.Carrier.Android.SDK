@@ -179,9 +179,13 @@ public interface CarrierHandler {
 	 * @param
 	 * 		from       	The user id from who send the file request
 	 * @param
+	 * 		fileid       	The file id of the sending file
+	 * @param
 	 * 		filename       	The file name sent from friend
+	 * @param
+	 * 		filesize       	The file size sent from friend
 	 */
-	void onFriendFileRequest(Carrier carrier, String from, String filename, long fileindex, long filesize);
+	void onFriendFileRequest(Carrier carrier, String from, String fileid, String filename, long filesize);
 
     /**
          * The callback function to process the friend file accepted.
@@ -189,55 +193,27 @@ public interface CarrierHandler {
          * @param
          * 		carrier   	Carrier node instance
          * @param
-         * 		receiver       	The user id who accepts the file sending request
+         * 		receiver     The user id who accepts the file sending request
+	 * @param
+	 * 		fileid       	The file id accepted by receiver
+	 * @param
+	 * 		filepath      The full file path accepted by receiver
          * @param
-         * 		fileindex       	The file index accepts by receiver
+         * 		filesize       The file size accepts by receiver
          */
-    void onFriendFileAccepted(Carrier carrier, String receiver, long fileindex);
+    void onFriendFileAccepted(Carrier carrier, String receiver, String fileid, String filepath, long filesize);
 
 	/**
-	 * The callback function to process the friend file chunk received.
+	 * The callback function to notify the file is paused.
 	 *
 	 * @param
 	 * 		carrier   	Carrier node instance
 	 * @param
-	 * 		from       	The user id from who send the file request
+	 * 		friendid    The friend id
 	 * @param
-	 * 		filepath       	The received full file path
-	 * @param
-	 * 		fileindex       	The file index
-	 * @param
-	 * 		fileposition       	The file block size will be transferred
+	 * 		fileid       	 The file id
 	 */
-	void onFriendFileChunkReceived(Carrier carrier, String from, String filepath, long fileindex, long fileposition);
-
-	/**
-	 * The callback function to process the friend file chunk sent.
-	 *
-	 * @param
-	 * 		carrier   	Carrier node instance
-	 * @param
-	 * 		to       	The user id from who accepted the file request
-	 * @param
-	 * 		filepath       	The received full file path
-	 * @param
-	 * 		fileindex       	The file index
-	 * @param
-	 * 		fileposition       	The file block size will be transferred
-	 */
-	void onFriendFileChunkSent(Carrier carrier, String to, String filepath, long fileindex, long fileposition);
-
-	/**
-	 * The callback function to process the friend file is paused.
-	 *
-	 * @param
-	 * 		carrier   	Carrier node instance
-	 * @param
-	 * 		id       	The user id from who paused the file request
-	 * @param
-	 * 		fileindex       	The file index
-	 */
-	void onFriendFilePaused(Carrier carrier, String id, long fileindex);
+	void onFriendFilePaused(Carrier carrier, String friendid, String fileid);
 
 	/**
 	 * The callback function to notify the file is resumed.
@@ -245,9 +221,51 @@ public interface CarrierHandler {
 	 * @param
 	 * 		carrier   	Carrier node instance
 	 * @param
-	 * 		id       	The user id from who resumed the file transferring
+	 * 		friendid    The friend id
 	 * @param
-	 * 		fileindex       	The file index
+	 * 		fileid       	The fileid
 	 */
-	void onFriendFileResumed(Carrier carrier, String id, long fileindex);
+	void onFriendFileResumed(Carrier carrier, String friendid, String fileid);
+
+	/**
+	 * The callback function to notify the file is canceled.
+	 *
+	 * @param
+	 * 		carrier   	Carrier node instance
+	 * @param
+	 * 		friendid    The friend id
+	 * @param
+	 * 		fileid       	The fileid
+	 */
+	void onFriendFileCanceled(Carrier carrier, String friendid, String fileid);
+
+	/**
+	 * The callback function to notify the file is completed.
+	 *
+	 * @param
+	 * 		carrier   	Carrier node instance
+	 * @param
+	 * 		friendid    The friend id
+	 * @param
+	 * 		fileid       	The fileid
+	 */
+	void onFriendFileCompleted(Carrier carrier, String friendid, String fileid);
+
+	/**
+	 * The callback function to process the friend file transferred.
+	 *
+	 * @param
+	 * 		carrier   	Carrier node instance
+	 * @param
+	 * 		friendid    The user id
+	 * @param
+	 * 		filepath     The full path of the transferred file
+	 * @param
+	 * 		fileid       	The file id
+	 * @param
+	 * 		totalsize    The total file size
+	 * @param
+	 * 		transferredsize      The transferred file size
+	 */
+	void onFriendFileProgress(Carrier carrier, String friendid, String filepath, String fileid, long totalsize, long transferredsize);
 }
