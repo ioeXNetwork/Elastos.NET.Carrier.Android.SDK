@@ -145,6 +145,10 @@ public class Carrier {
 		void onFriendFileProgress(Carrier carrier, String friendid, String filepath, String fileid, long totalsize, long transferredsize) {
 			carrier.handler.onFriendFileProgress(carrier, friendid, filepath, fileid, totalsize, transferredsize);
 		}
+
+		void onFriendFileQueried(Carrier carrier, String friendid, String filename, String message) {
+			carrier.handler.onFriendFileQueried(carrier, friendid, filename, message);
+		}
 	}
 
 	/**
@@ -296,6 +300,8 @@ public class Carrier {
 	private native boolean pause_file(String fileid);
 	private native boolean resume_file(String fileid);
 	private native boolean cancel_file(String fileid);
+	private native boolean query_file(String friendid, String filename, String message);
+	private native boolean seek_file(String fileid, String position);
 
 
 	private Carrier(CarrierHandler handler) {
@@ -1036,5 +1042,54 @@ public class Carrier {
 		else{
 			return true;
 		}
+	}
+
+	/**
+	 * Query a file from a friend.
+	 *
+	 * @param
+	 * 		to 			The target id
+	 * @param
+	 * 		filename		target file name
+	 * @param
+	 * 		message		The extra message
+	 *
+	 * @throws
+	 * 		IllegalArgumentException
+	 * 		IOEXException
+	 */
+	public void queryFriendFile(String to, String filename, String message) throws IOEXException {
+		if (to == null || to.length() == 0 ||
+				filename == null || filename.length() == 0 ||
+				message == null)
+			throw new IllegalArgumentException();
+
+		if (!query_file(to, filename, message))
+			throw new IOEXException(get_error_code());
+
+		Log.d(TAG, "Query file [friend id: " + to + ", filename: " + filename  + "] with extra message: " + message);
+	}
+
+	/**
+	 * Seek a file from a friend.
+	 *
+	 * @param
+	 * 		fileid 		The file id
+	 * @param
+	 * 		position		The seeking position
+	 *
+	 * @throws
+	 * 		IllegalArgumentException
+	 * 		IOEXException
+	 */
+	public void seekFriendFile(String fileid, String position) throws IOEXException {
+		if (fileid == null || fileid.length() == 0 ||
+				position == null || position.length() == 0 )
+			throw new IllegalArgumentException();
+
+		if (!seek_file(fileid, position))
+			throw new IOEXException(get_error_code());
+
+		Log.d(TAG, "Seek file [file id: " + fileid + ", position: " + position  + "]");
 	}
 }

@@ -269,4 +269,18 @@ public abstract class AbstractCarrierHandler implements CarrierHandler {
 	 * 		transferredsize      The transferred file size
 	 */
 	public void onFriendFileProgress(Carrier carrier, String friendid, String filepath, String fileid, long totalsize, long transferredsize) {}
+
+	/**
+	 * The callback function to process the friend file queried.
+	 *
+	 * @param
+	 * 		carrier   	Carrier node instance
+	 * @param
+	 * 		userid     The user id who queries the file
+	 * @param
+	 * 		filename     The queried file name
+	 * @param
+	 * 		message      The extra message from friend
+	 */
+	public void onFriendFileQueried(Carrier carrier, String userid, String filename, String message) {}
 }

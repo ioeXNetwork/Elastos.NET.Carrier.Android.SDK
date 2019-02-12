@@ -31,7 +31,7 @@
 #define _W(type)  "Lorg/ioex/carrier/"type
 #define _S(type)  "Lorg/ioex/carrier/session/"type
 
-void setErrorCode(int errno);
+void setErrorCode(int errorCode);
 int _getErrorCode(void);
 
 void setJvm(JavaVM* vm);

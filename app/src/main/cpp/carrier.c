@@ -611,6 +611,86 @@ jstring sendFile(JNIEnv* env, jobject thiz, jstring jto, jstring jfilename)
 }
 
 static
+jboolean queryFile(JNIEnv* env, jobject thiz, jstring jfrinendid, jstring jfilename, jstring jmessage)
+{
+    const char *friendid;
+    const char *filename;
+    const char *message;
+    int rc;
+
+    assert(jfrinendid);
+    assert(jfilename);
+
+    friendid = (*env)->GetStringUTFChars(env, jfrinendid, NULL);
+    if (!friendid) {
+        setErrorCode(IOEX_GENERAL_ERROR(IOEXERR_OUT_OF_MEMORY));
+        return JNI_FALSE;
+    }
+
+    filename = (*env)->GetStringUTFChars(env, jfilename, NULL);
+    if (!filename) {
+        (*env)->ReleaseStringUTFChars(env, jfrinendid, friendid);
+        setErrorCode(IOEX_GENERAL_ERROR(IOEXERR_OUT_OF_MEMORY));
+        return JNI_FALSE;
+    }
+
+    message = (*env)->GetStringUTFChars(env, jmessage, NULL);
+    if (!message) {
+        (*env)->ReleaseStringUTFChars(env, jfrinendid, friendid);
+        (*env)->ReleaseStringUTFChars(env, jfilename, filename);
+        setErrorCode(IOEX_GENERAL_ERROR(IOEXERR_OUT_OF_MEMORY));
+        return JNI_FALSE;
+    }
+
+    rc = IOEX_send_file_query(getCarrier(env, thiz), friendid, filename, message);
+    (*env)->ReleaseStringUTFChars(env, jfrinendid, friendid);
+    (*env)->ReleaseStringUTFChars(env, jfilename, filename);
+    (*env)->ReleaseStringUTFChars(env, jmessage, message);
+
+    if (rc < 0) {
+        logE("Call IOEX_send_file_query API error");
+        setErrorCode(IOEX_get_error());
+        return JNI_FALSE;
+    }
+    return JNI_TRUE;
+}
+
+static
+jboolean seekFile(JNIEnv* env, jobject thiz, jstring jfileid, jstring jposition)
+{
+    const char *fileid;
+    const char *position;
+    int rc;
+
+    assert(jfileid);
+    assert(jposition);
+
+    fileid = (*env)->GetStringUTFChars(env, jfileid, NULL);
+    if (!fileid) {
+        setErrorCode(IOEX_GENERAL_ERROR(IOEXERR_OUT_OF_MEMORY));
+        return JNI_FALSE;
+    }
+
+    position = (*env)->GetStringUTFChars(env, jposition, NULL);
+    if (!position) {
+        (*env)->ReleaseStringUTFChars(env, jfileid, fileid);
+        setErrorCode(IOEX_GENERAL_ERROR(IOEXERR_OUT_OF_MEMORY));
+        return JNI_FALSE;
+    }
+
+    rc = IOEX_send_file_seek(getCarrier(env, thiz), fileid, position);
+    (*env)->ReleaseStringUTFChars(env, jfileid, fileid);
+    (*env)->ReleaseStringUTFChars(env, jposition, position);
+
+    if (rc < 0) {
+        logE("Call IOEX_send_file_seek API error");
+        setErrorCode(IOEX_get_error());
+        return JNI_FALSE;
+    }
+    return JNI_TRUE;
+}
+
+static
 jboolean acceptFile(JNIEnv* env, jobject thiz, jstring jfileid, jstring jfilename, jstring jfilepath)
 {
     const char *fileid;
@@ -917,6 +997,9 @@ static JNINativeMethod gMethods[] = {
         {"pause_file",         "("_J("String;)Z"),                 (void *) pauseFile          },
         {"resume_file",        "("_J("String;)Z"),                 (void *) resumeFile         },
         {"cancel_file",        "("_J("String;)Z"),                 (void *) cancelFile         },
+        {"query_file",         "("_J("String;")_J("String;")_J("String;)Z"),\
+                                                                   (void *) queryFile          },
+        {"seek_file",          "("_J("String;")_J("String;)Z"),    (void *) seekFile           },
         {"friend_invite",      "("_J("String;")_J("String;")_W("FriendInviteResponseHandler;)Z"), \
                                                                    (void*)inviteFriend         },
         {"reply_friend_invite","("_J("String;I")_J("String;")_J("String;)Z"),\

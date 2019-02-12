@@ -709,6 +709,50 @@ void cbOnFileProgress(IOEXCarrier *carrier, const char *fileid, const char *frie
     (*hc->env)->DeleteLocalRef(hc->env, jfileid);
 }
 
+static
+void cbOnFileQueried(IOEXCarrier *carrier, const char *friendid, const char *filename, const char *message, void *context)
+{
+    HandlerContext* hc = (HandlerContext*)context;
+    jstring jfriendid, jfilename, jmessage;
+
+    assert(friendid);
+    assert(filename);
+    assert(message);
+    assert(hc->env);
+
+    jfriendid = (*hc->env)->NewStringUTF(hc->env ,friendid);
+    if(!jfriendid){
+        logE("New java String(jfriendid) object error");
+        return;
+    }
+
+    jfilename = (*hc->env)->NewStringUTF(hc->env ,filename);
+    if(!jfilename){
+        logE("New java String(jfilename) object error");
+        (*hc->env)->DeleteLocalRef(hc->env, jfriendid);
+        return;
+    }
+
+    jmessage = (*hc->env)->NewStringUTF(hc->env ,message);
+    if(!jmessage){
+        logE("New java String(jmessage) object error");
+        (*hc->env)->DeleteLocalRef(hc->env, jfriendid);
+        (*hc->env)->DeleteLocalRef(hc->env, jfilename);
+        return;
+    }
+
+    if (!callVoidMethod(hc->env, hc->clazz, hc->callbacks,
+                        "onFriendFileQueried",
+                        "("_W("Carrier;")_J("String;")_J("String;")_J("String;")")V",
+                        hc->carrier, jfriendid, jfilename, jmessage)) {
+        logE("Call Carrier.Callbacks.onFriendFileQueried error");
+    }
+    (*hc->env)->DeleteLocalRef(hc->env, jfriendid);
+    (*hc->env)->DeleteLocalRef(hc->env, jfilename);
+    (*hc->env)->DeleteLocalRef(hc->env, jmessage);
+
+}
+
 IOEXCallbacks  carrierCallbacks = {
         .idle            = cbOnIdle,
         .connection_status = cbOnConnection,
@@ -730,7 +774,7 @@ IOEXCallbacks  carrierCallbacks = {
         .file_canceled   = cbOnFileCanceled,
         .file_completed  = cbOnFileCompleted,
         .file_progress   = cbOnFileProgress,
-
+        .file_queried    = cbOnFileQueried,
 };
 
 int handlerCtxtSet(HandlerContext* hc, JNIEnv* env, jobject jcarrier, jobject jcallbacks)
