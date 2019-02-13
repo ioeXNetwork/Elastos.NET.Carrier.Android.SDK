@@ -20,6 +20,27 @@
  * SOFTWARE.
  */
 
+/*
+ * Copyright (c) 2019 ioeXNetwork
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 package org.ioex.carrier;
 
 import java.nio.ByteBuffer;
@@ -116,6 +137,38 @@ public class Carrier {
 
 		void onFriendInviteRequest(Carrier carrier, String from, String data) {
 			carrier.handler.onFriendInviteRequest(carrier, from, data);
+		}
+
+		void onFriendFileRequest(Carrier carrier, String from, String fileid, String filename, long filesize) {
+			carrier.handler.onFriendFileRequest(carrier, from, fileid, filename, filesize);
+		}
+
+        void onFriendFileAccepted(Carrier carrier, String receiver, String fileid, String filepath, long filesize) {
+            carrier.handler.onFriendFileAccepted(carrier, receiver, fileid, filepath, filesize);
+        }
+
+		void onFriendFilePaused(Carrier carrier, String friendid, String fileid) {
+			carrier.handler.onFriendFilePaused(carrier, friendid, fileid);
+		}
+
+		void onFriendFileResumed(Carrier carrier, String friendid, String fileid) {
+			carrier.handler.onFriendFileResumed(carrier, friendid, fileid);
+		}
+
+		void onFriendFileCanceled(Carrier carrier, String friendid, String fileid) {
+			carrier.handler.onFriendFileCanceled(carrier, friendid, fileid);
+		}
+
+		void onFriendFileCompleted(Carrier carrier, String friendid, String fileid) {
+			carrier.handler.onFriendFileCompleted(carrier, friendid, fileid);
+		}
+
+		void onFriendFileProgress(Carrier carrier, String friendid, String filepath, String fileid, long totalsize, long transferredsize) {
+			carrier.handler.onFriendFileProgress(carrier, friendid, filepath, fileid, totalsize, transferredsize);
+		}
+
+		void onFriendFileQueried(Carrier carrier, String friendid, String filename, String message) {
+			carrier.handler.onFriendFileQueried(carrier, friendid, filename, message);
 		}
 	}
 
@@ -263,6 +316,13 @@ public class Carrier {
 	private native boolean reply_friend_invite(String from, int status, String reason,
 											   String data);
 	private static native int get_error_code();
+	private native String send_file(String to, String filename);
+	private native boolean accept_file(String fileid, String filename, String filepath);
+	private native boolean pause_file(String fileid);
+	private native boolean resume_file(String fileid);
+	private native boolean cancel_file(String fileid);
+	private native boolean query_file(String friendid, String filename, String message);
+	private native boolean seek_file(String fileid, String position);
 
 	private Carrier(CarrierHandler handler) {
 		this.handler = handler;
@@ -390,7 +450,7 @@ public class Carrier {
 			carrierThread = new Thread() {
 				@Override
 				public void run() {
-					Log.i(TAG, "Native carrier node started");
+					Log.i(TAG, "Native carrier node started: " + Thread.currentThread().getId() + "/ " + Thread.currentThread().getName());
 					if (!carrier.native_run(iterateInterval)) {
 						Log.e(TAG, "Native carrier node started error(" + get_error_code() + ")");
 						return;
@@ -875,5 +935,181 @@ public class Carrier {
 		else
 			Log.d(TAG, String.format("Refused friend invite to %s with status %d and " +
 					"reason %s", to, status, reason));
+	}
+
+	/**
+	 * Send a file to a friend.
+	 *
+	 * @param
+	 * 		to 			The target id
+	 * @param
+	 * 		filename		The message content defined by application
+	 *
+	 * @throws
+	 * 		IllegalArgumentException
+	 * 		IOEXException
+	 */
+	public String sendFriendFile(String to, String filename) throws IOEXException {
+		if (to == null || to.length() == 0 ||
+				filename == null || filename.length() == 0)
+			throw new IllegalArgumentException();
+
+        Log.d(TAG, "sendFriendFile: [" + filename + "] " + Thread.currentThread().getId() + "/ " + Thread.currentThread().getName());
+		String fileid = send_file(to, filename);
+		if(fileid == null){
+			throw new IOEXException(get_error_code());
+		}
+		Log.d(TAG, "Send file [" + filename + "] to friend " + to + "(fileid: " + fileid + " )");
+
+		return fileid;
+	}
+
+	/**
+	 * Accept a file from a friend.
+	 *
+	 *
+	 * @param
+	 * 		fileid		The accepted file id
+	 * @param
+	 * 		filename		New file name
+	 * @param
+	 * 		filepath		The saved path for the accepted file
+	 *
+	 * @throws
+	 * 		IllegalArgumentException
+	 * 		IOEXException
+	 */
+	public void acceptFriendFile(String fileid, String filename, String filepath) throws IOEXException {
+		if (fileid == null || fileid.length() == 0 ||
+			filename == null || filename.length() == 0 ||
+			filepath == null || filepath.length() == 0)
+			throw new IllegalArgumentException();
+
+		if (!accept_file(fileid, filename, filepath))
+			throw new IOEXException(get_error_code());
+
+		Log.d(TAG, "Accept file [fileid: " + fileid + ", new filename: " + filename  + "] @ filepath: " + filepath);
+	}
+
+	/**
+	 * Pause the process of sending/receiving a file to/from a friend.
+	 *
+	 * @param
+	 * 		fileid		The id of the pausing file
+	 *
+	 * @throws
+	 * 		IllegalArgumentException
+	 * 		IOEXException
+	 */
+	public boolean pauseFriendFile(String fileid) throws IOEXException {
+		if (fileid == null || fileid.length() == 0)
+			throw new IllegalArgumentException();
+
+		Log.d(TAG, "Pause file [" + fileid + "]");
+		if (!pause_file(fileid)) {
+			Log.e(TAG, "pauseFriendFile Exception: " + get_error_code());
+			return false;
+		}
+		else{
+			return true;
+		}
+
+	}
+
+	/**
+	 * Resume the process of sending/receiving a file to/from a friend.
+	 *
+	 * @param
+	 * 		fileid		The id of the resuming file
+	 *
+	 * @throws
+	 * 		IllegalArgumentException
+	 * 		IOEXException
+	 */
+	public boolean resumeFriendFile(String fileid) throws IOEXException {
+		if (fileid == null || fileid.length() == 0)
+			throw new IllegalArgumentException();
+
+		Log.d(TAG, "Resume file [" + fileid + "]");
+		if (!resume_file(fileid)) {
+			Log.e(TAG, "resumeFriendFile Exception: " + get_error_code());
+			return false;
+		}
+		else{
+			return true;
+		}
+	}
+
+	/**
+	 * Cancel the process of sending/receiving a file to/from a friend.
+	 *
+	 * @param
+	 * 		fileid		The id of the canceling file
+	 *
+	 * @throws
+	 * 		IllegalArgumentException
+	 * 		IOEXException
+	 */
+	public boolean cancelFriendFile(String fileid) throws IOEXException {
+		if (fileid == null || fileid.length() == 0)
+			throw new IllegalArgumentException();
+
+		Log.d(TAG, "Cancel file [" + fileid + "]");
+		if (!cancel_file(fileid)) {
+			Log.e(TAG, "cancelFriendFile Exception: " + get_error_code());
+			return false;
+		}
+		else{
+			return true;
+		}
+	}
+
+	/**
+	 * Query a file from a friend.
+	 *
+	 * @param
+	 * 		to 			The target id
+	 * @param
+	 * 		filename		target file name
+	 * @param
+	 * 		message		The extra message
+	 *
+	 * @throws
+	 * 		IllegalArgumentException
+	 * 		IOEXException
+	 */
+	public void queryFriendFile(String to, String filename, String message) throws IOEXException {
+		if (to == null || to.length() == 0 ||
+				filename == null || filename.length() == 0 ||
+				message == null)
+			throw new IllegalArgumentException();
+
+		if (!query_file(to, filename, message))
+			throw new IOEXException(get_error_code());
+
+		Log.d(TAG, "Query file [friend id: " + to + ", filename: " + filename  + "] with extra message: " + message);
+	}
+
+	/**
+	 * Seek a file from a friend.
+	 *
+	 * @param
+	 * 		fileid 		The file id
+	 * @param
+	 * 		position		The seeking position
+	 *
+	 * @throws
+	 * 		IllegalArgumentException
+	 * 		IOEXException
+	 */
+	public void seekFriendFile(String fileid, String position) throws IOEXException {
+		if (fileid == null || fileid.length() == 0 ||
+				position == null || position.length() == 0 )
+			throw new IllegalArgumentException();
+
+		if (!seek_file(fileid, position))
+			throw new IOEXException(get_error_code());
+
+		Log.d(TAG, "Seek file [file id: " + fileid + ", position: " + position  + "]");
 	}
 }

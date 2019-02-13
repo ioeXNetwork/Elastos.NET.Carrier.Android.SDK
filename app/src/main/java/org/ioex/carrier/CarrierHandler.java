@@ -20,6 +20,28 @@
  * SOFTWARE.
  */
 
+/*
+ * Copyright (c) 2019 ioeXNetwork
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+
 package org.ioex.carrier;
 
 import java.util.List;
@@ -170,4 +192,116 @@ public interface CarrierHandler {
 	 * 		data       	The application defined data sent from friend
 	 */
 	void onFriendInviteRequest(Carrier carrier, String from, String data);
+
+	/**
+	 * The callback function to process the friend file request.
+	 *
+	 * @param
+	 * 		carrier   	Carrier node instance
+	 * @param
+	 * 		from       	The user id from who send the file request
+	 * @param
+	 * 		fileid       	The file id of the sending file
+	 * @param
+	 * 		filename       	The file name sent from friend
+	 * @param
+	 * 		filesize       	The file size sent from friend
+	 */
+	void onFriendFileRequest(Carrier carrier, String from, String fileid, String filename, long filesize);
+
+    /**
+         * The callback function to process the friend file accepted.
+         *
+         * @param
+         * 		carrier   	Carrier node instance
+         * @param
+         * 		receiver     The user id who accepts the file sending request
+	 * @param
+	 * 		fileid       	The file id accepted by receiver
+	 * @param
+	 * 		filepath      The full file path accepted by receiver
+         * @param
+         * 		filesize       The file size accepts by receiver
+         */
+    void onFriendFileAccepted(Carrier carrier, String receiver, String fileid, String filepath, long filesize);
+
+	/**
+	 * The callback function to notify the file is paused.
+	 *
+	 * @param
+	 * 		carrier   	Carrier node instance
+	 * @param
+	 * 		friendid    The friend id
+	 * @param
+	 * 		fileid       	 The file id
+	 */
+	void onFriendFilePaused(Carrier carrier, String friendid, String fileid);
+
+	/**
+	 * The callback function to notify the file is resumed.
+	 *
+	 * @param
+	 * 		carrier   	Carrier node instance
+	 * @param
+	 * 		friendid    The friend id
+	 * @param
+	 * 		fileid       	The fileid
+	 */
+	void onFriendFileResumed(Carrier carrier, String friendid, String fileid);
+
+	/**
+	 * The callback function to notify the file is canceled.
+	 *
+	 * @param
+	 * 		carrier   	Carrier node instance
+	 * @param
+	 * 		friendid    The friend id
+	 * @param
+	 * 		fileid       	The fileid
+	 */
+	void onFriendFileCanceled(Carrier carrier, String friendid, String fileid);
+
+	/**
+	 * The callback function to notify the file is completed.
+	 *
+	 * @param
+	 * 		carrier   	Carrier node instance
+	 * @param
+	 * 		friendid    The friend id
+	 * @param
+	 * 		fileid       	The fileid
+	 */
+	void onFriendFileCompleted(Carrier carrier, String friendid, String fileid);
+
+	/**
+	 * The callback function to process the friend file transferred.
+	 *
+	 * @param
+	 * 		carrier   	Carrier node instance
+	 * @param
+	 * 		friendid    The user id
+	 * @param
+	 * 		filepath     The full path of the transferred file
+	 * @param
+	 * 		fileid       	The file id
+	 * @param
+	 * 		totalsize    The total file size
+	 * @param
+	 * 		transferredsize      The transferred file size
+	 */
+	void onFriendFileProgress(Carrier carrier, String friendid, String filepath, String fileid, long totalsize, long transferredsize);
+
+	/**
+	 * The callback function to process the friend file queried.
+	 *
+	 * @param
+	 * 		carrier   	Carrier node instance
+	 * @param
+	 * 		userid     The user id who queries the file
+	 * @param
+	 * 		filename     The queried file name
+	 * @param
+	 * 		message      The extra message from friend
+	 */
+	void onFriendFileQueried(Carrier carrier, String userid, String filename, String message);
 }
