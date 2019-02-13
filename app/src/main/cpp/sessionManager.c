@@ -24,8 +24,8 @@
 #include <assert.h>
 #include <stdlib.h>
 #include <string.h>
-#include <ela_carrier.h>
-#include <ela_session.h>
+#include <IOEX_carrier.h>
+#include <IOEX_session.h>
 
 #include "log.h"
 #include "utils.h"
@@ -42,7 +42,7 @@ typedef struct CallbackContext {
 static CallbackContext callbackContext;
 
 static
-void onSessionRequestCallback(ElaCarrier* carrier, const char* from, const char* sdp,
+void onSessionRequestCallback(IOEXCarrier* carrier, const char* from, const char* sdp,
                               size_t len, void* context)
 {
     CallbackContext* cc = (CallbackContext*)context;
@@ -100,7 +100,7 @@ bool callbackCtxtSet(CallbackContext* hc, JNIEnv* env, jobject jcarrier, jobject
 
     lclazz = (*env)->GetObjectClass(env, jhandler);
     if (!lclazz) {
-        setErrorCode(ELA_GENERAL_ERROR(ELAERR_LANGUAGE_BINDING));
+        setErrorCode(IOEX_GENERAL_ERROR(IOEXERR_LANGUAGE_BINDING));
         return false;
     }
 
@@ -109,7 +109,7 @@ bool callbackCtxtSet(CallbackContext* hc, JNIEnv* env, jobject jcarrier, jobject
     gjhandler = (*env)->NewGlobalRef(env, jhandler);
 
     if (!gclazz || !gjcarrier || !gjhandler) {
-        setErrorCode(ELA_GENERAL_ERROR(ELAERR_OUT_OF_MEMORY));
+        setErrorCode(IOEX_GENERAL_ERROR(IOEXERR_OUT_OF_MEMORY));
         goto errorExit;
     }
 
@@ -156,15 +156,15 @@ jboolean sessionMgrInit(JNIEnv* env, jclass clazz, jobject jcarrier, jobject jha
     if (jhandler) {
         hc = (CallbackContext*)&callbackContext;
         if (!callbackCtxtSet(hc, env, jcarrier, jhandler)) {
-            setErrorCode(ELA_GENERAL_ERROR(ELAERR_LANGUAGE_BINDING));
+            setErrorCode(IOEX_GENERAL_ERROR(IOEXERR_LANGUAGE_BINDING));
             return JNI_FALSE;
         }
     }
 
-    rc = ela_session_init(getCarrier(env, jcarrier), onSessionRequestCallback, hc);
+    rc = IOEX_session_init(getCarrier(env, jcarrier), onSessionRequestCallback, hc);
     if (rc < 0) {
-        logE("Call ela_session_init API error");
-        setErrorCode(ela_get_error());
+        logE("Call IOEX_session_init API error");
+        setErrorCode(IOEX_get_error());
         return JNI_FALSE;
     }
 
@@ -179,14 +179,14 @@ void sessionMgrCleanup(JNIEnv* env, jclass clazz, jobject jcarrier)
     (void)clazz;
 
     callbackCtxtCleanup(&callbackContext, env);
-    ela_session_cleanup(getCarrier(env, jcarrier));
+    IOEX_session_cleanup(getCarrier(env, jcarrier));
 }
 
 static
 jobject createSession(JNIEnv* env, jobject thiz, jobject jcarrier, jstring jto)
 {
     const char *to;
-    ElaSession *session;
+    IOEXSession *session;
     jobject jsession;
 
     assert(jcarrier);
@@ -196,21 +196,21 @@ jobject createSession(JNIEnv* env, jobject thiz, jobject jcarrier, jstring jto)
 
     to = (*env)->GetStringUTFChars(env, jto, NULL);
     if (!to) {
-        setErrorCode(ELA_GENERAL_ERROR(ELAERR_LANGUAGE_BINDING));
+        setErrorCode(IOEX_GENERAL_ERROR(IOEXERR_LANGUAGE_BINDING));
         return NULL;
     }
 
-    session = ela_session_new(getCarrier(env, jcarrier), to);
+    session = IOEX_session_new(getCarrier(env, jcarrier), to);
     (*env)->ReleaseStringUTFChars(env, jto, to);
     if (!session) {
-        logE("Call ela_session_new API error");
-        setErrorCode(ela_get_error());
+        logE("Call IOEX_session_new API error");
+        setErrorCode(IOEX_get_error());
         return NULL;
     }
 
     if (!newJavaSession(env, session, jto, &jsession)) {
-        ela_session_close(session);
-        setErrorCode(ELA_GENERAL_ERROR(ELAERR_LANGUAGE_BINDING));
+        IOEX_session_close(session);
+        setErrorCode(IOEX_GENERAL_ERROR(IOEXERR_LANGUAGE_BINDING));
         return NULL;
     }
 
@@ -226,7 +226,7 @@ jint getErrorCode(JNIEnv* env, jclass clazz)
     return _getErrorCode();
 }
 
-static const char* gClassName = "org/elastos/carrier/session/Manager";
+static const char* gClassName = "org/ioex/carrier/session/Manager";
 static JNINativeMethod gMethods[] = {
         {"native_init",      "("_W("Carrier;")_S("ManagerHandler;)Z"),  (void*)sessionMgrInit   },
         {"native_cleanup",   "("_W("Carrier;)V"),                       (void*)sessionMgrCleanup},

@@ -25,12 +25,12 @@
 #include <stdlib.h>
 #include "log.h"
 #include "utils.h"
-#include "ela_carrier.h"
+#include "IOEX_carrier.h"
 #include "carrierUtils.h"
 #include "carrierHandler.h"
 
 static
-void cbOnIdle(ElaCarrier* carrier, void* context)
+void cbOnIdle(IOEXCarrier* carrier, void* context)
 {
     assert(carrier);
     assert(context);
@@ -47,7 +47,7 @@ void cbOnIdle(ElaCarrier* carrier, void* context)
 }
 
 static
-void cbOnConnection(ElaCarrier* carrier, ElaConnectionStatus status, void* context)
+void cbOnConnection(IOEXCarrier* carrier, IOEXConnectionStatus status, void* context)
 {
     HandlerContext *hc = (HandlerContext *) context;
     jobject jstatus = NULL;
@@ -74,7 +74,7 @@ void cbOnConnection(ElaCarrier* carrier, ElaConnectionStatus status, void* conte
 }
 
 static
-void cbOnReady(ElaCarrier* carrier, void* context)
+void cbOnReady(IOEXCarrier* carrier, void* context)
 {
     assert(carrier);
     assert(context);
@@ -92,7 +92,7 @@ void cbOnReady(ElaCarrier* carrier, void* context)
 }
 
 static
-void cbOnSelfInfoChanged(ElaCarrier* carrier, const ElaUserInfo* userInfo, void* context)
+void cbOnSelfInfoChanged(IOEXCarrier* carrier, const IOEXUserInfo* userInfo, void* context)
 {
     HandlerContext* hc = (HandlerContext*)context;
     jobject juserInfo;
@@ -119,7 +119,7 @@ void cbOnSelfInfoChanged(ElaCarrier* carrier, const ElaUserInfo* userInfo, void*
 }
 
 static
-bool cbFriendsIterated(ElaCarrier* carrier, const ElaFriendInfo* friendInfo, void* context)
+bool cbFriendsIterated(IOEXCarrier* carrier, const IOEXFriendInfo* friendInfo, void* context)
 {
     HandlerContext* hc = (HandlerContext*)context;
     jobject jfriendInfo = NULL;
@@ -151,8 +151,8 @@ bool cbFriendsIterated(ElaCarrier* carrier, const ElaFriendInfo* friendInfo, voi
 }
 
 static
-void cbOnFriendConnectionChanged(ElaCarrier *carrier, const char *friendId,
-                                 ElaConnectionStatus status, void *context)
+void cbOnFriendConnectionChanged(IOEXCarrier *carrier, const char *friendId,
+                                 IOEXConnectionStatus status, void *context)
 {
     HandlerContext *hc = (HandlerContext *) context;
     jstring jfriendId;
@@ -188,8 +188,8 @@ void cbOnFriendConnectionChanged(ElaCarrier *carrier, const char *friendId,
 }
 
 static
-void cbOnFriendInfoChanged(ElaCarrier* carrier, const char* friendId,
-                           const ElaFriendInfo* friendInfo, void* context)
+void cbOnFriendInfoChanged(IOEXCarrier* carrier, const char* friendId,
+                           const IOEXFriendInfo* friendInfo, void* context)
 {
     HandlerContext* hc = (HandlerContext*)context;
     jstring jfriendId;
@@ -226,8 +226,8 @@ void cbOnFriendInfoChanged(ElaCarrier* carrier, const char* friendId,
 }
 
 static
-void cbOnFriendPresence(ElaCarrier* carrier, const char* friendId,
-                        ElaPresenceStatus status, void* context)
+void cbOnFriendPresence(IOEXCarrier* carrier, const char* friendId,
+                        IOEXPresenceStatus status, void* context)
 {
     HandlerContext* hc = (HandlerContext*)context;
     jstring jfriendId;
@@ -264,7 +264,7 @@ void cbOnFriendPresence(ElaCarrier* carrier, const char* friendId,
 }
 
 static
-void cbOnFriendAdded(ElaCarrier* carrier, const ElaFriendInfo* friendInfo, void* context)
+void cbOnFriendAdded(IOEXCarrier* carrier, const IOEXFriendInfo* friendInfo, void* context)
 {
     HandlerContext* hc = (HandlerContext*)context;
     jobject jfriendInfo;
@@ -291,7 +291,7 @@ void cbOnFriendAdded(ElaCarrier* carrier, const ElaFriendInfo* friendInfo, void*
 }
 
 static
-void cbOnFriendRemoved(ElaCarrier* carrier, const char* friendId, void* context)
+void cbOnFriendRemoved(IOEXCarrier* carrier, const char* friendId, void* context)
 {
     HandlerContext* hc = (HandlerContext*)context;
     jstring jfriendId;
@@ -319,7 +319,7 @@ void cbOnFriendRemoved(ElaCarrier* carrier, const char* friendId, void* context)
 }
 
 static
-void cbOnFriendRequest(ElaCarrier* carrier, const char* userId, const ElaUserInfo* userInfo,
+void cbOnFriendRequest(IOEXCarrier* carrier, const char* userId, const IOEXUserInfo* userInfo,
                        const char* hello, void* context)
 {
     HandlerContext* hc = (HandlerContext*)context;
@@ -366,7 +366,7 @@ void cbOnFriendRequest(ElaCarrier* carrier, const char* userId, const ElaUserInf
 }
 
 static
-void cbOnFriendMessage(ElaCarrier* carrier, const char* friendId, const void* message, size_t length,
+void cbOnFriendMessage(IOEXCarrier* carrier, const char* friendId, const void* message, size_t length,
                        void* context)
 {
     HandlerContext* hc = (HandlerContext*)context;
@@ -405,7 +405,7 @@ void cbOnFriendMessage(ElaCarrier* carrier, const char* friendId, const void* me
 }
 
 static
-void cbOnFriendInviteRquest(ElaCarrier* carrier, const char* from, const void* hello,
+void cbOnFriendInviteRquest(IOEXCarrier* carrier, const char* from, const void* hello,
                             size_t length, void* context)
 {
     HandlerContext* hc = (HandlerContext*)context;
@@ -443,7 +443,7 @@ void cbOnFriendInviteRquest(ElaCarrier* carrier, const char* from, const void* h
     (*hc->env)->DeleteLocalRef(hc->env, jhello);
 }
 
-ElaCallbacks  carrierCallbacks = {
+IOEXCallbacks  carrierCallbacks = {
         .idle            = cbOnIdle,
         .connection_status = cbOnConnection,
         .ready           = cbOnReady,

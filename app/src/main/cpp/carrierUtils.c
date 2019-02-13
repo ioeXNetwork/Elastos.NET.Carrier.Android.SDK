@@ -23,12 +23,12 @@
 #include <jni.h>
 #include <stdlib.h>
 #include <assert.h>
-#include <ela_carrier.h>
+#include <IOEX_carrier.h>
 #include "utilsExt.h"
 #include "log.h"
 #include "carrierUtils.h"
 
-#define _T(type)  "org/elastos/carrier/"type
+#define _T(type)  "org/ioex/carrier/"type
 
 int getOptionsHelper(JNIEnv* env, jobject jopts, OptionsHelper* opts)
 {
@@ -148,7 +148,7 @@ void cleanupOptionsHelper(OptionsHelper* opts)
     }
 }
 
-int getNativeUserInfo(JNIEnv* env, jobject juserInfo, ElaUserInfo* ui)
+int getNativeUserInfo(JNIEnv* env, jobject juserInfo, IOEXUserInfo* ui)
 {
     jclass clazz;
 
@@ -173,7 +173,7 @@ int getNativeUserInfo(JNIEnv* env, jobject juserInfo, ElaUserInfo* ui)
     return 1;
 }
 
-int setJavaUserInfo(JNIEnv *env, jclass clazz, jobject jinfo, const ElaUserInfo *userInfo)
+int setJavaUserInfo(JNIEnv *env, jclass clazz, jobject jinfo, const IOEXUserInfo *userInfo)
 {
     return (setBoolean(env, clazz, jinfo, "setHasAvatar", userInfo->has_avatar) &&
             setString(env, clazz, jinfo, "setUserId", userInfo->userid) &&
@@ -185,7 +185,7 @@ int setJavaUserInfo(JNIEnv *env, jclass clazz, jobject jinfo, const ElaUserInfo 
             setString(env, clazz, jinfo, "setRegion", userInfo->region));
 }
 
-int newJavaUserInfo(JNIEnv* env, const ElaUserInfo* userInfo, jobject* juserInfo)
+int newJavaUserInfo(JNIEnv* env, const IOEXUserInfo* userInfo, jobject* juserInfo)
 {
     jclass clazz;
     jmethodID contor;
@@ -218,7 +218,7 @@ int newJavaUserInfo(JNIEnv* env, const ElaUserInfo* userInfo, jobject* juserInfo
     return 1;
 }
 
-int newJavaPresenceStatus(JNIEnv* env, ElaPresenceStatus status, jobject* jpresence)
+int newJavaPresenceStatus(JNIEnv* env, IOEXPresenceStatus status, jobject* jpresence)
 {
     jclass clazz;
     jobject jobj;
@@ -243,7 +243,7 @@ int newJavaPresenceStatus(JNIEnv* env, ElaPresenceStatus status, jobject* jprese
     return 1;
 }
 
-int newNativePresenceStatus(JNIEnv *env, jobject jpresence, ElaPresenceStatus *presence)
+int newNativePresenceStatus(JNIEnv *env, jobject jpresence, IOEXPresenceStatus *presence)
 {
     jclass clazz;
     int rc;
@@ -261,11 +261,11 @@ int newNativePresenceStatus(JNIEnv *env, jobject jpresence, ElaPresenceStatus *p
         return 0;
     }
 
-    *presence = (ElaPresenceStatus)value;
+    *presence = (IOEXPresenceStatus)value;
     return 1;
 }
 
-int newJavaConnectionStatus(JNIEnv* env, ElaConnectionStatus status, jobject* jstatus)
+int newJavaConnectionStatus(JNIEnv* env, IOEXConnectionStatus status, jobject* jstatus)
 {
     jclass clazz;
     jobject jobj;
@@ -288,7 +288,7 @@ int newJavaConnectionStatus(JNIEnv* env, ElaConnectionStatus status, jobject* js
     return 1;
 }
 
-int newJavaFriendInfo(JNIEnv* env, const ElaFriendInfo* friendInfo, jobject* jfriendInfo)
+int newJavaFriendInfo(JNIEnv* env, const IOEXFriendInfo* friendInfo, jobject* jfriendInfo)
 {
     jclass clazz;
     jmethodID contor;

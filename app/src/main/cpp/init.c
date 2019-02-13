@@ -24,7 +24,7 @@
 #include <stdlib.h>
 #include "log.h"
 #include "utils.h"
-#include "ela_session.h"
+#include "IOEX_session.h"
 
 extern int registerCarrierMethods(JNIEnv* env);
 extern int registerCarrierSessionManagerMethods(JNIEnv* env);
@@ -54,7 +54,7 @@ jclass findClass(JNIEnv* env, const char* className)
 
 static int getClassLoader(JNIEnv* env)
 {
-    jclass clazz = (*env)->FindClass(env, "org/elastos/carrier/Carrier");
+    jclass clazz = (*env)->FindClass(env, "org/ioex/carrier/Carrier");
     jclass metaClazz = (*env)->GetObjectClass(env, clazz);
     jmethodID method = (*env)->GetMethodID(env, metaClazz, "getClassLoader",
                                            "()Ljava/lang/ClassLoader;");
@@ -103,7 +103,7 @@ jint JNI_OnLoad(JavaVM* vm, void* reserved)
 
     setJvm(vm);
 
-    ela_session_jni_onload(vm, reserved);
+    IOEX_session_jni_onload(vm, reserved);
 
     logI("Android java JNI loaded");
 

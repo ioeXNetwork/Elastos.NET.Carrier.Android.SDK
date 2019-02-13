@@ -22,15 +22,15 @@
 
 #include <jni.h>
 #include <stdlib.h>
-#include <ela_session.h>
+#include <IOEX_session.h>
 
 #include "sessionUtils.h"
 #include "sessionCookie.h"
 #include "log.h"
 
-int newJavaStreamState(JNIEnv* env, ElaStreamState state, jobject* jstate)
+int newJavaStreamState(JNIEnv* env, IOEXStreamState state, jobject* jstate)
 {
-    const char* clazzName = "org/elastos/carrier/session/StreamState";
+    const char* clazzName = "org/ioex/carrier/session/StreamState";
     jclass clazz = findClass(env, clazzName);
     if (!clazz) {
         logE("Java enum 'StreamState' not found");
@@ -49,9 +49,9 @@ int newJavaStreamState(JNIEnv* env, ElaStreamState state, jobject* jstate)
     return 1;
 }
 
-int getNativeStreamType(JNIEnv* env, jobject jjtype, ElaStreamType* type)
+int getNativeStreamType(JNIEnv* env, jobject jjtype, IOEXStreamType* type)
 {
-    const char* clazzName = "org/elastos/carrier/session/StreamType";
+    const char* clazzName = "org/ioex/carrier/session/StreamType";
     jclass clazz = (*env)->FindClass(env, clazzName);
     if (!clazz) {
         logE("Java enum 'StreamType' not found");
@@ -65,13 +65,13 @@ int getNativeStreamType(JNIEnv* env, jobject jjtype, ElaStreamType* type)
         return 0;
     }
 
-    *type = (ElaStreamType)value;
+    *type = (IOEXStreamType)value;
     return 1;
 }
 
-int newJavaSession(JNIEnv* env, ElaSession* session, jobject jto, jobject* jsession)
+int newJavaSession(JNIEnv* env, IOEXSession* session, jobject jto, jobject* jsession)
 {
-    const char* clazzName = "org/elastos/carrier/session/Session";
+    const char* clazzName = "org/ioex/carrier/session/Session";
     jclass clazz = (*env)->FindClass(env, clazzName);
     if (!clazz) {
         logE("Java enum 'Session' not found");
@@ -97,7 +97,7 @@ int newJavaSession(JNIEnv* env, ElaSession* session, jobject jto, jobject* jsess
 
 int newJavaStream(JNIEnv* env, jobject jtype, jobject* jstream)
 {
-    const char* clazzName = "org/elastos/carrier/session/Stream";
+    const char* clazzName = "org/ioex/carrier/session/Stream";
     jclass clazz = (*env)->FindClass(env, clazzName);
     if (!clazz) {
         logE("Java enum 'Stream' not found");
@@ -122,7 +122,7 @@ int newJavaStream(JNIEnv* env, jobject jtype, jobject* jstream)
 
 int newJavaCloseReason(JNIEnv* env, CloseReason reason, jobject* jreason)
 {
-    const char* clazzName = "org/elastos/carrier/session/CloseReason";
+    const char* clazzName = "org/ioex/carrier/session/CloseReason";
     jclass clazz = findClass(env, clazzName);
     if (!clazz) {
         logE("Java enum 'CloseReason' not found");
@@ -143,7 +143,7 @@ int newJavaCloseReason(JNIEnv* env, CloseReason reason, jobject* jreason)
 
 int getNativeProtocol(JNIEnv* env, jobject jprotocol, PortForwardingProtocol* protocol)
 {
-    const char* clazzName = "org/elastos/carrier/session/PortForwardingProtocol";
+    const char* clazzName = "org/ioex/carrier/session/PortForwardingProtocol";
     jclass clazz = (*env)->FindClass(env, clazzName);
     if (!clazz) {
         logE("Java enum 'PortForwardingProtocol' not found");
@@ -195,9 +195,9 @@ int newInetSocketAddress(JNIEnv *env, const char *host, int port, jobject* jsock
 }
 
 static
-int newJavaAddresInfo(JNIEnv *env, ElaAddressInfo *info, jobject *jaddrInfo)
+int newJavaAddresInfo(JNIEnv *env, IOEXAddressInfo *info, jobject *jaddrInfo)
 {
-    const char* clazzName = "org/elastos/carrier/session/AddressInfo";
+    const char* clazzName = "org/ioex/carrier/session/AddressInfo";
     jclass clazz = (*env)->FindClass(env, clazzName);
     if (!clazz) {
         logE("Java class 'AddressInfo' not found");
@@ -264,7 +264,7 @@ int newJavaAddresInfo(JNIEnv *env, ElaAddressInfo *info, jobject *jaddrInfo)
     return 1;
 }
 
-int setJavaTransportInfo(JNIEnv *env, jobject jtransport, ElaTransportInfo *info)
+int setJavaTransportInfo(JNIEnv *env, jobject jtransport, IOEXTransportInfo *info)
 {
     jclass clazz = (*env)->GetObjectClass(env, jtransport);
     if (!clazz) {

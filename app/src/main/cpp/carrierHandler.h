@@ -24,13 +24,13 @@
 #define __JNI_CARRUER_HADNDLER_H__
 
 #include <jni.h>
-#include <ela_carrier.h>
+#include <IOEX_carrier.h>
 
-extern ElaCallbacks carrierCallbacks;
+extern IOEXCallbacks carrierCallbacks;
 
 typedef struct HandlerContext {
     JNIEnv* env;
-    ElaCarrier* nativeCarrier;
+    IOEXCarrier* nativeCarrier;
     jclass  clazz;
     jobject carrier;
     jobject callbacks;
